@@ -13,6 +13,7 @@ class PackageDeliverySystem(object):
     def run():
         graph = Graph()
         locations_hash = HashTable(20)
+        packages_hash = HashTable(40)
 
         with open('location_data.csv') as csvfile:
             location_data = csv.reader(csvfile)
@@ -36,8 +37,9 @@ class PackageDeliverySystem(object):
                 package = Package(*(data_row+[locations_hash.find(data_row[1])]))
 
                 all_packages.append(package)
+                packages_hash.insert(package.identifier, package)
 
-                if package.is_high_priority:
+                if package.is_high_priority():
                     high_priority.append(package)
                 else:
                     low_priority.append(package)
@@ -66,23 +68,22 @@ class PackageDeliverySystem(object):
             timedelta(hours=10, minutes=20)
         ]
 
-        high_priority = sorted(high_priority, key=graph.find_distance_from(start_location))
-        low_priority = sorted(low_priority, key=graph.find_distance_from(start_location))
+        high_priority = sorted(high_priority, key=graph.distance_to_deliver(start_location))
+        low_priority = sorted(low_priority, key=graph.distance_to_deliver(start_location))
 
         count = 0
         truck_idx = 0
         i = 0
 
         while count < len(all_packages):
-            print(count)
-            print(i)
             truck = trucks[truck_idx]
-            leave_hub_at = times_to_leave_hub[i]
-
-            truck.wait_at_hub(leave_hub_at)
             
-            high_packages = [p for p in high_priority if p.can_be_delivered_by(truck)]
-            for package in high_packages:
+            if i < len(times_to_leave_hub):
+                leave_hub_at = times_to_leave_hub[i]
+                truck.wait_at_hub(leave_hub_at)
+            
+            filtered_high = [p for p in high_priority if truck.can_deliver(p)]
+            for package in filtered_high:
                 truck.add_package(package)
                 count += 1
 
@@ -90,7 +91,8 @@ class PackageDeliverySystem(object):
                     break
 
             if truck.is_full() is not True:
-                for package in [p for p in low_priority if p.can_be_delivered_by(truck)]:
+                filtered_low = [p for p in low_priority if truck.can_deliver(p)]
+                for package in filtered_low: 
                     truck.add_package(package)
                     count += 1
 
@@ -100,3 +102,8 @@ class PackageDeliverySystem(object):
             truck.deliver_packages(graph, (len(all_packages) - count) > truck.max)
             i += 1
             truck_idx = i % len(trucks)
+
+        def total_distance(truck):
+            return truck.total_distance
+
+        return [sum(map(total_distance, trucks)), packages_hash, all_packages]

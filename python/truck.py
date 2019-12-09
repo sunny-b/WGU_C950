@@ -28,19 +28,25 @@ class Truck(object):
     def wait_at_hub(self, timestamp):
         self.current_time = timestamp
 
+    def can_deliver(self, package):
+        return not package.on_truck and self.identifier in package.truck_availability and self.current_time >= package.ready_at
+
     def deliver_packages(self, city_map, return_to_hub=True):
         current_location = self.start_location
+        locations = list(self.locations)
 
         while self.packages:
-            self.packages = sorted(self.packages, key=city_map.find_distance_from(current_location))
-            closest_package = self.packages.pop(0)
-            closest_location = closest_package.destination
-
+            locations = sorted(locations, key=city_map.distance_from(current_location))
+            closest_location = locations.pop(0)
+            
             distance = city_map.find_distance_between(current_location, closest_location)
             time_to_deliver = self._time_to_travel(distance)
             delivered_at = self.current_time + timedelta(seconds=time_to_deliver)
-
-            closest_package.delivered_at = delivered_at
+    
+            packages_at_location = [p for p in self.packages if p.destination.identifier == closest_location.identifier]
+            for package in packages_at_location:
+                package.delivered_at = delivered_at
+                self.packages.remove(package)
 
             current_location = closest_location
             self.total_distance += distance
@@ -52,6 +58,9 @@ class Truck(object):
 
             self.current_time = self.current_time + timedelta(seconds=time_to_return)
             self.total_distance += distance
-            self.packages = []
+
+            self.locations = set()
+
+
     def _time_to_travel(self, distance):
         return (distance / self.DRIVING_SPEED_IN_MPH) * self.SECONDS_PER_HOUR

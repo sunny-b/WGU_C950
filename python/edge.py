@@ -3,9 +3,3 @@ class Edge(object):
         self.location = location
         self.identifier = location.identifier
         self.weight = weight
-
-    def name(self):
-        return self.location.name
-
-    def address(self):
-        return self.location.address

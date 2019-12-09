@@ -17,10 +17,16 @@ class Graph(object):
         return self.vertices.find(location.identifier)
 
     def find_distance_between(self, origin, target):
-        return self.vertices.find(origin.identifier).find_edge(target.identifier).weight
+        return self.vertices.find(origin.identifier).distance_to(target)
 
-    def find_distance_from(self, location):
+    def distance_to_deliver(self, location):
         def distance_to(package):
-            return self.vertices.find(location.identifier).find_edge(package.destination.identifier).weight
+            return self.vertices.find(location.identifier).distance_to(package.destination)
+
+        return distance_to
+
+    def distance_from(self, origin):
+        def distance_to(destination):
+            return self.vertices.find(origin.identifier).distance_to(destination)
 
         return distance_to

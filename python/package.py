@@ -2,7 +2,7 @@ from datetime import timedelta
 import re
 
 class Package(object):
-    EOD_TIMESTAMP = timedelta(hours=17, minutes=0, seconds=0)
+    EOD_TIMESTAMP = timedelta(hours=17)
     SPECIAL_PACKAGES = [13, 15, 19]
     DELIVERED = "DELIVERED"
     ON_TRUCK = "ON TRUCK"
@@ -27,7 +27,7 @@ class Package(object):
 
         self._modify(notes)
 
-    def report(self, time):
+    def report(self, time=timedelta(hours=17)):
         return 'ID: {}\n \
                 Status: {}\n \
                 Destination: {}\n \
@@ -37,7 +37,7 @@ class Package(object):
                 Delivered On Time: {}'.format(
                     self.identifier,
                     self._status(time),
-                    self.destination,
+                    self.destination.address,
                     self.left_hub_at,
                     self.deadline,
                     self.delivered_at,
@@ -45,10 +45,10 @@ class Package(object):
                 )
 
     def has_deadline(self):
-        return self.deadline < self.EOD_TIMESTAMP
+        return self.deadline != self.EOD_TIMESTAMP
 
     def is_high_priority(self):
-        return self.has_deadline or self.notes != None or self.identifier in self.SPECIAL_PACKAGES
+        return self.has_deadline() or self.notes != 'None' or self.identifier in self.SPECIAL_PACKAGES
 
     def can_be_delivered_by(self, truck):
         return not self.on_truck and truck.identifier in self.truck_availability and truck.current_time >= self.ready_at

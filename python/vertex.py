@@ -11,5 +11,5 @@ class Vertex(object):
     def find_edge(self, edge_id):
         return self.edges.find(edge_id)
 
-    def find_distance_to(self, package):
-        return self.edges.find(package.location.identifier).weight
+    def distance_to(self, location):
+        return self.edges.find(location.identifier).weight
