@@ -28,11 +28,27 @@ class Package(object):
         self._modify(notes)
 
     def report(self, time=timedelta(hours=17)):
+        report ="""\
+                ID: {}
+                Destination: {}
+                Deadline: {}
+                Delivery Status: {}\
+                """.format(
+                    self.identifier,
+                    self.destination.address,
+                    self.left_hub_at
+                )
+
+       if time > self.delivered_at:
+           report += """\
+                     Delivered On Time: {}\
+                     """
+
         return 'ID: {}\n \
-                Status: {}\n \
                 Destination: {}\n \
                 Left Hub At: {}\n \
                 Deadline: {}\n \
+                Delivery Status: {}\n \
                 Delivered At: {}\n \
                 Delivered On Time: {}'.format(
                     self.identifier,
