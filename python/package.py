@@ -4,9 +4,9 @@ import re
 class Package(object):
     EOD_TIMESTAMP = timedelta(hours=17)
     SPECIAL_PACKAGES = [13, 15, 19]
-    DELIVERED = "DELIVERED"
-    ON_TRUCK = "ON TRUCK"
-    AT_HUB = "AT HUB"
+    DELIVERED = 'Delivered At {}'
+    ON_TRUCK = 'On Truck - Left Hub At: {}'
+    AT_HUB = 'Waiting At Hub'
 
     def __init__(self, identifier, street, city, zipcode, deadline, weight_in_kilos, notes, destination):
         self.identifier = int(identifier)
@@ -27,38 +27,33 @@ class Package(object):
 
         self._modify(notes)
 
+    def inline_report(self, time):
+        report = self.report(time)
+
+        return report[1:].replace('\n', '\t')
+
     def report(self, time=timedelta(hours=17)):
-        report ="""\
-                ID: {}
-                Destination: {}
-                Deadline: {}
-                Delivery Status: {}\
-                """.format(
-                    self.identifier,
-                    self.destination.address,
-                    self.left_hub_at
-                )
+        report ="""
+Package ID: {}
+Destination: {}
+Deadline: {}
+Delivery Status: {}\
+"""
+        
+        args = [
+            self.identifier,
+            self.destination.address,
+            self.deadline,
+            self._delivery_status(time)
+        ]
 
-       if time > self.delivered_at:
-           report += """\
-                     Delivered On Time: {}\
-                     """
+        if time > self.delivered_at:
+           report += """
+Delivered On Time: {}\
+"""
+           args.append((self.delivered_at <= self.deadline))
 
-        return 'ID: {}\n \
-                Destination: {}\n \
-                Left Hub At: {}\n \
-                Deadline: {}\n \
-                Delivery Status: {}\n \
-                Delivered At: {}\n \
-                Delivered On Time: {}'.format(
-                    self.identifier,
-                    self._status(time),
-                    self.destination.address,
-                    self.left_hub_at,
-                    self.deadline,
-                    self.delivered_at,
-                    self.delivered_at <= self.deadline
-                )
+        return report.format(*args)
 
     def has_deadline(self):
         return self.deadline != self.EOD_TIMESTAMP
@@ -69,11 +64,11 @@ class Package(object):
     def can_be_delivered_by(self, truck):
         return not self.on_truck and truck.identifier in self.truck_availability and truck.current_time >= self.ready_at
 
-    def _status(self, time):
+    def _delivery_status(self, time):
         if time > self.delivered_at:
-            return self.DELIVERED
+            return self.DELIVERED.format(self.delivered_at)
         elif time > self.left_hub_at:
-            return self.ON_TRUCK
+            return self.ON_TRUCK.format(self.left_hub_at)
 
         return self.AT_HUB
 

@@ -12,17 +12,17 @@ clear()
 
 print('This is the WGU Package Delivery System')
 print('All packages were delivered in {} miles'.format(total_distance))
-print()
 
 while True:
-    command = input(
-            "Command Menu: \n \
-               id - look an individual package ID \n \
-               time - view delivery status of all packages for a specific time \n \
-               clear - clear screen \n \
-               exit - exit program \n \
-               Please enter a command: "
-            )
+    print()
+    command = input("""\
+Command Menu:
+   id - look an individual package ID
+   time - view delivery status of all packages for a specific time
+   distance - display total distance the trucks traveled
+   clear - clear screen
+   exit - exit program
+   Please enter a command: """)
 
     if command == 'id':
         package_id = input('Please enter a package ID to lookup: ')
@@ -33,7 +33,6 @@ while True:
         timestamp = timedelta(hours=int(hour), minutes=int(minute), seconds=int(sec))
 
         print(package.report(timestamp))
-        print()
     
     elif command == 'time':
         time_string = input('Please enter a timestamp in HH:MM:SS format: ')
@@ -41,9 +40,10 @@ while True:
         timestamp = timedelta(hours=int(hour), minutes=int(minute), seconds=int(sec))
 
         for package in packages:
-            print(package.report(timestamp))
-
-        print()
+            print(package.inline_report(timestamp))
+            
+    elif command == 'distance':
+        print('Total Distance: {} miles'.format(total_distance))
 
     elif command == 'clear':
         clear()
@@ -51,4 +51,3 @@ while True:
         exit()
     else:
         print('Invalid command. Please try again.')
-        print()
