@@ -30,40 +30,40 @@ class Package(object):
     def inline_report(self, time):
         report = self.report(time)
 
-        return report[1:].replace('\n', '\t')
+        return report[1:].replace('\n', '   ')
 
     def report(self, time=timedelta(hours=17)):
-        report ="""
-Package ID: {}
-Destination: {}
+        return """
+ID: {}
+Address: {} {} UT
+Zipcode: {}
 Deadline: {}
+Weight: {}
 Delivery Status: {}\
-"""
+""".format(
+    self.identifier,
+    self.street,
+    self.city,
+    self.zip,
+    self._deadline(),
+    self.weight_in_kilos,
+    self._delivery_status(time)
+)
         
-        args = [
-            self.identifier,
-            self.destination.address,
-            self.deadline,
-            self._delivery_status(time)
-        ]
-
-        if time > self.delivered_at:
-           report += """
-Delivered On Time: {}\
-"""
-           args.append((self.delivered_at <= self.deadline))
-
-        return report.format(*args)
-
     def has_deadline(self):
         return self.deadline != self.EOD_TIMESTAMP
 
+    def _deadline(self):
+        if self.deadline == self.EOD_TIMESTAMP:
+            return '{} (EOD)'.format(self.deadline)
+
+        return '{}'.format(self.deadline)
+
+    # determines if a package is a high priority based on if it has a deadline or special instructions
     def is_high_priority(self):
         return self.has_deadline() or self.notes != 'None' or self.identifier in self.SPECIAL_PACKAGES
 
-    def can_be_delivered_by(self, truck):
-        return not self.on_truck and truck.identifier in self.truck_availability and truck.current_time >= self.ready_at
-
+    # determines the delivery status based on the timestamp passed in
     def _delivery_status(self, time):
         if time > self.delivered_at:
             return self.DELIVERED.format(self.delivered_at)
@@ -79,6 +79,7 @@ Delivered On Time: {}\
         (hour, minute, sec) = time_string.split(':')
         return timedelta(hours=int(hour), minutes=int(minute), seconds=int(sec))
 
+    # this modifies the package state based on it's special instructions
     def _modify(self, notes):
         if re.match('Wrong address listed', notes):
             self.ready_at = timedelta(hours=10, minutes=20)

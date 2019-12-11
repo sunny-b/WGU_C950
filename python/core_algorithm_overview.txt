@@ -1,0 +1,29 @@
+# A:Algorithm Selection
+
+I used a greedy algorithm combined with a Graph data structure to find the shortest distance from point to point on the graph/map. I also used a priority algorithm combined with a list data structure to distribute the packages between the trucks.
+
+# B1: Logic Comments
+
+Comments are distributed throughout all the files describing how the program runs and how the data flows. The comments also provide time complexity went is it warranted.
+
+# B2: Application of Programming Models
+
+CSV files are used to transfer raw data into the program. Within the program, data is exchanged through function calls and passing arguments to those functions. The host environment is the local machine so no network protocols were used or needed to run/host this program. Furthmore, I used Python3 3.7.5/3.8.0 and Vim to write the program and pylint to improve the code.
+
+Since this program isn't connected to the Internet, there is no concept of "connecting" or "disconnecting". However, for the user interface, the user "connects" by starting the program with `python3 main.py`. Data is exchanged when the user types in a command to the user interface for either "id" to get an individual package or "time" to get all packages. Finally, the user disconnects from the user interface by using the `exit` command or using <C-c>.
+
+# B3:Space-Time and Big-O
+
+The time complexity is described in the comments throughout the program. However, the overall greedy algorithm has a time complexity of O(n^2 log(n)) because for each location that a truck must travel to, it must sort the list of locations in order to get the next closest location to its current location. Additionally, the truck uses a list for packages, a set for locations, and a graph for the city map, so the overall space complexity is O(n^2) because every vertex in the graph has a bi-directional edge to every other vertex.
+
+For the priority list, the time complexity is O(n log(n)) due to sorting and the space complexity is O(n) for the lists.
+
+# B4:Adaptability
+
+The greedy algorithm is quite adaptable. My algorithm would be able to handle an increased number of packages and locations without needing to change anything in the code as all that data is obtained directly from CSV files. There is very little hard coding in my program. There are a couple places that would need to be adjusted to make my solution more general as I optimized my solution for this given program. One example is that I reduced the number of max packages on a truck from 16 to 14 as I found that to be more optimal better distribute packages between trips. Increasing that back to 16 would make it more scalable. Furthermore, I adjusted how a package is determined to be a high priority based on the special notes that some of the packages have. Were new special notes were to be added, I would need to adjust how to packages are determined to be high or low priority.
+
+# B5: Software Efficiency and Maintainability
+
+My program takes advantage of object-oriented programming and splitting out responsibilities between various classes. This makes the code more maintainable as it is easier to understand how the data flows through the program and many of my methods are small and conform to the "single-responsibility" principle. Furthmore. I've provided comments on the various functions to explain how they work and I take advantage of several built-in Python methods such as sorting and filtering. Since these are built-in methods, these are subject to less change and are maintained by the maintainers of Python. Additionally, many of my methods are small, which make them easy to test and debug -- which makes the overall code easier more efficient.
+
+One suggestion for improving the maintainability of my program is to break up the "run" method in the PackageDeliverySystem into smaller methods to make it more testable. Also, creating a class and interface that is in charge of reading all the CSV files so that way the main program doesn't need to be aware of them.

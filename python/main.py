@@ -26,6 +26,8 @@ Command Menu:
 
     if command == 'id':
         package_id = input('Please enter a package ID to lookup: ')
+        
+        # lookup package id from hash table. O(N) - N being the size of the bucket
         package = packages_hash.find(int(package_id))
 
         time_string = input('Please enter a timestamp with HH:MM:SS format: ')
@@ -39,6 +41,7 @@ Command Menu:
         (hour, minute, sec) = time_string.split(':')
         timestamp = timedelta(hours=int(hour), minutes=int(minute), seconds=int(sec))
 
+        # loop through all packages and display their status
         for package in packages:
             print(package.inline_report(timestamp))
             
